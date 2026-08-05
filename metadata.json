@@ -1,0 +1,6 @@
+{
+  "name": "Cordero F",
+  "description": "Aplicación de gestión de tareas personales en español con recordatorios inteligentes, seguridad por PIN, offline/online y privacidad garantizada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

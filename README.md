@@ -1,19 +1,19 @@
-# Cordero F — Aplicación de Gestión de Tareas Personales Privada
+# Cordero F — Gestor de Vida Diaria, Citas, Tareas y Hábitos
 
-**Cordero F** es una aplicación de gestión de tareas personales en español diseñada bajo el principio de **privacidad absoluta y funcionamiento 100% offline**. Cuenta con recordatorios inteligentes, análisis en lenguaje natural, bloqueo por PIN de seguridad y un diseño visual de estilo táctico militar.
+**Cordero F** es una aplicación de gestión de vida diaria personal en español diseñada bajo el principio de **privacidad absoluta, cero APIs externas y funcionamiento 100% offline**. Cuenta con agenda de citas y eventos, calendario táctico mensual, seguimiento de hábitos y rutinas con rachas, matriz de priorización Eisenhower local, notificaciones push locales en el dispositivo móvil y un diseño visual de alta legibilidad.
 
 ---
 
 ## 🛡️ Características Principales
 
-- **Garantía de Privacidad y Funcionamiento Offline**: Todos los datos (tareas, notas, fechas, sub-tareas) se guardan localmente en el dispositivo utilizando la base de datos **Room (SQLite)**. No requiere servidor externo ni envía datos a la nube.
-- **Protección por PIN de Seguridad**: Sistema de bloqueo numérico de 4 dígitos para impedir el acceso no autorizado a tu agenda personal.
-- **Recordatorios Inteligentes**: Sistema de alarmas locales con `AlarmManager` y `NotificationChannel` para no perder ninguna entrega ni evento importante.
-- **Entrada Rápida con Lenguaje Natural**: Procesa texto en español (ej. *"Reunión mañana 16:00 urgente trabajo"*) y extrae automáticamente la fecha, hora, categoría y nivel de prioridad.
-- **Sugerencia de Sub-tareas**: Generador inteligente de listas de verificación tácticas para descomponer tareas complejas en pasos sencillos.
-- **Resumen Diario Inteligente**: Evaluador de urgencia y recomendaciones de enfoque Pomodoro / priorización.
-- **Copia de Seguridad Offline (JSON)**: Exportación e importación rápida de datos en formato JSON para respaldar o transferir tu información de manera segura.
-- **Diseño Táctico Militar**: Interfaz en tono verde oliva táctico, caqui y cañón de escopeta para máxima legibilidad y menor consumo de batería.
+- **Gestión Integral de Agenda, Citas y Tareas**: Organización por categorías dedicadas (*Citas & Eventos, Trabajo, Personal, Salud, Finanzas, Hogar, Compras, Estudio*), niveles de prioridad y estados de cumplimiento.
+- **Calendario Táctico Mensual e Interactivo**: Vista mensual y diaria detallada para explorar citas programadas, agregar eventos rápidamente seleccionando días específicos en el calendario y filtrar compromisos.
+- **Seguimiento de Hábitos & Rutinas Diarias**: Módulo de seguimiento de hábitos personales (agua, ejercicio, lectura, medicamentos, descanso) con contadores de rachas en días y barra de progreso de cumplimiento diario.
+- **Matriz de Priorización Eisenhower 100% Local**: Organización inteligente de tareas en 4 cuadrantes (*Hazlo ya, Planificar, Rápido/Trámites, Pendientes*) y motor de análisis en español local sin requerir llamadas a APIs o IA externa.
+- **Notificaciones Push Locales en el Dispositivo**: Programación de recordatorios con `AlarmManager`, `BroadcastReceiver` y `NotificationCompat` que funcionan sin conexión a Internet y con botón de prueba de notificación directa.
+- **Garantía de Privacidad y Funcionamiento Offline**: Todos los datos se guardan localmente en la base de datos **Room (SQLite)** de Android. No requiere servidores ni transmite datos fuera del teléfono.
+- **Protección por PIN de Seguridad**: Sistema de bloqueo numérico con PIN de 4 dígitos para resguardar el acceso a tu información personal.
+- **Copia de Seguridad en JSON**: Exportación e importación rápida de copias de respaldo en almacenamiento local.
 
 ---
 
@@ -21,8 +21,7 @@
 
 - **Lenguaje**: Kotlin
 - **Interfaz de Usuario**: Jetpack Compose (Material Design 3)
-- **Base de Datos Local**: Room Database + Coroutines & Flow
-- **Serialización**: Moshi
+- **Base de Datos Local**: Room Database (SQLite) + Kotlin Coroutines & Flow
 - **Alarmas y Notificaciones**: Android AlarmManager + BroadcastReceiver + NotificationCompat
 - **Arquitectura**: MVVM (Model-View-ViewModel) + Clean Architecture
 

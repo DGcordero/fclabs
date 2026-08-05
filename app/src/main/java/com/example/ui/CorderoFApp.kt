@@ -65,13 +65,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.TaskCategory
 import com.example.data.TaskEntity
 import com.example.data.TaskPriority
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import com.example.ui.components.AddEditTaskSheet
 import com.example.ui.components.CategoryChipGroup
+import com.example.ui.components.EisenhowerMatrixView
+import com.example.ui.components.HabitsTrackerView
 import com.example.ui.components.PinLockScreen
 import com.example.ui.components.QuickStatsBar
 import com.example.ui.components.SecuritySettingsDialog
 import com.example.ui.components.SmartAssistantSheet
+import com.example.ui.components.TacticalCalendarView
 import com.example.ui.components.TaskItemCard
+import com.example.ui.components.UpcomingAppointmentsPanel
 import com.example.ui.theme.EmeraldPrimary
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -101,6 +112,7 @@ fun CorderoFApp(
     val isSmartAssistantOpen by viewModel.isSmartAssistantOpen.collectAsState()
 
     var showSortMenu by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(0) } // 0: Tareas & Citas, 1: Calendario, 2: Matriz IA
 
     val addEditSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val smartAssistantSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -198,11 +210,65 @@ fun CorderoFApp(
             ExtendedFloatingActionButton(
                 onClick = { viewModel.openAddSheet() },
                 icon = { Icon(Icons.Default.Add, contentDescription = "Añadir Tarea") },
-                text = { Text("Nueva Tarea", fontWeight = FontWeight.Bold) },
+                text = { Text("Nueva Tarea / Cita", fontWeight = FontWeight.Bold) },
                 containerColor = EmeraldPrimary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.testTag("add_task_fab")
             )
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 8.dp
+            ) {
+                NavigationBarItem(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    icon = { Icon(Icons.Default.Checklist, contentDescription = "Tareas y Citas") },
+                    label = { Text("Agenda", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    icon = { Icon(Icons.Default.CalendarMonth, contentDescription = "Calendario") },
+                    label = { Text("Calendario", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    icon = { Icon(Icons.Default.Whatshot, contentDescription = "Hábitos y Rutinas") },
+                    label = { Text("Hábitos", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == 3,
+                    onClick = { selectedTab = 3 },
+                    icon = { Icon(Icons.Default.GridView, contentDescription = "Matriz Eisenhower") },
+                    label = { Text("Matriz", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
@@ -213,11 +279,90 @@ fun CorderoFApp(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
+            when (selectedTab) {
+                1 -> {
+                    // TAB 1: Calendario Táctico
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            TacticalCalendarView(
+                                tasks = tasks,
+                                onAddNewAppointmentForDate = { dateMs ->
+                                    viewModel.openAddSheetForDate(dateMs)
+                                },
+                                onTaskClick = { task ->
+                                    viewModel.openEditSheet(task)
+                                }
+                            )
+                        }
+                    }
+                }
+                2 -> {
+                    // TAB 2: Hábitos & Rutinas Diarias
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HabitsTrackerView()
+                        }
+                    }
+                }
+                3 -> {
+                    // TAB 3: Matriz de Priorización Local
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            EisenhowerMatrixView(
+                                tasks = tasks,
+                                onQuickAddParsedTask = { title, desc, cat, prio, dateMs, timeStr, subtasksList ->
+                                    viewModel.saveTask(
+                                        id = 0,
+                                        title = title,
+                                        description = desc,
+                                        category = cat,
+                                        priority = prio,
+                                        dueDateEpochMs = dateMs,
+                                        dueTimeFormatted = timeStr,
+                                        reminderEpochMs = if (dateMs != null) dateMs else null,
+                                        isPinned = false,
+                                        subtasks = subtasksList.map { com.example.data.Subtask(id = java.util.UUID.randomUUID().toString(), title = it, isCompleted = false) }
+                                    )
+                                },
+                                onTaskClick = { task ->
+                                    viewModel.openEditSheet(task)
+                                }
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    // TAB 0: Vista Principal
+                    Column(modifier = Modifier.fillMaxSize()) {
             // Dashboard Summary Header
             QuickStatsBar(
                 stats = stats,
                 isOfflineMode = viewModel.securityManager.isOfflineOnlyMode(),
                 onSecurityClick = { viewModel.isSecurityDialogOpen.value = true }
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Upcoming Appointments & Pending Tasks Panel
+            UpcomingAppointmentsPanel(
+                tasks = tasks,
+                securityManager = viewModel.securityManager,
+                onLockApp = { viewModel.lockApp() },
+                onOpenSecuritySettings = { viewModel.isSecurityDialogOpen.value = true },
+                onAddNewAppointment = { viewModel.openAddSheet() },
+                onTaskClick = { task -> viewModel.openEditSheet(task) }
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -393,6 +538,9 @@ fun CorderoFApp(
                                 }
                             }
                         )
+                    }
+                }
+            }
                     }
                 }
             }

@@ -47,6 +47,9 @@ object SmartTaskParser {
 
         // 2. Category Detection
         when {
+            lowerText.contains("cita") || lowerText.contains("citas") || lowerText.contains("evento") || lowerText.contains("dentista") || lowerText.contains("consulta") || lowerText.contains("agendar") -> {
+                detectedCategory = TaskCategory.CITAS
+            }
             lowerText.contains("trabajo") || lowerText.contains("reunión") || lowerText.contains("reunion") || lowerText.contains("informe") || lowerText.contains("oficina") || lowerText.contains("cliente") -> {
                 detectedCategory = TaskCategory.TRABAJO
             }

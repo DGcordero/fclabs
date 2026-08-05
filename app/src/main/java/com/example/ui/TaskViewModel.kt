@@ -253,6 +253,19 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         isAddEditSheetOpen.value = true
     }
 
+    fun openAddSheetForDate(dateMs: Long) {
+        editingTask.value = TaskEntity(
+            title = "",
+            description = "",
+            category = TaskCategory.CITAS.name,
+            priority = TaskPriority.MEDIA.name,
+            dueDateEpochMs = dateMs,
+            dueTimeFormatted = "10:00"
+        )
+        quickAiInput.value = ""
+        isAddEditSheetOpen.value = true
+    }
+
     fun openEditSheet(task: TaskEntity) {
         editingTask.value = task
         quickAiInput.value = ""

@@ -57,6 +57,9 @@ import com.example.data.TaskEntity
 import com.example.data.TaskPriority
 import com.example.smart.SmartTaskParser
 import com.example.smart.SmartUrgencyEngine
+import android.widget.Toast
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.NotificationsActive
 import com.example.ui.theme.EmeraldPrimary
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -387,8 +390,9 @@ fun AddEditTaskSheet(
                     Icon(imageVector = Icons.Default.Alarm, contentDescription = null, tint = EmeraldPrimary)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Activar Recordatorio Inteligente",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Notificación Push en Dispositivo",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
                 Switch(
@@ -403,6 +407,26 @@ fun AddEditTaskSheet(
                     },
                     colors = SwitchDefaults.colors(checkedThumbColor = EmeraldPrimary)
                 )
+            }
+
+            if (hasReminder) {
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedButton(
+                    onClick = {
+                        val testIntent = android.content.Intent(context, com.example.reminder.TaskReminderReceiver::class.java).apply {
+                            putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_ID, 9999)
+                            putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_TITLE, if (title.isNotBlank()) "Recordatorio: $title" else "Recordatorio de Prueba")
+                            putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_DESC, "Notificación Push local activada correctamente en tu dispositivo 📱")
+                        }
+                        context.sendBroadcast(testIntent)
+                        Toast.makeText(context, "Notificación Push enviada al dispositivo 🔔", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Probar Notificación Push Inmediata", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(14.dp))

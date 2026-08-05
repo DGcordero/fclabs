@@ -15,6 +15,7 @@ enum class TaskPriority(val displayName: String, val level: Int) {
 
 enum class TaskCategory(val displayName: String, val iconName: String) {
     TODAS("Todas", "FormatListBulleted"),
+    CITAS("Citas & Eventos", "Event"),
     PERSONAL("Personal", "Person"),
     TRABAJO("Trabajo", "Work"),
     SALUD("Salud", "Favorite"),
@@ -71,4 +72,20 @@ data class TaskEntity(
     }
 
     fun getSubtasksList(): List<Subtask> = parseSubtasks(subtasksJson)
+
+    fun getFormattedDueDate(): String {
+        return if (dueDateEpochMs != null) {
+            val sdf = java.text.SimpleDateFormat("dd MMM", java.util.Locale("es", "ES"))
+            val dateStr = sdf.format(java.util.Date(dueDateEpochMs))
+            if (!dueTimeFormatted.isNullOrBlank()) {
+                "$dateStr, $dueTimeFormatted"
+            } else {
+                dateStr
+            }
+        } else if (!dueTimeFormatted.isNullOrBlank()) {
+            dueTimeFormatted
+        } else {
+            "Sin fecha"
+        }
+    }
 }

@@ -39,36 +39,92 @@ Si estás usando esta aplicación dentro de **Google AI Studio**:
 
 ---
 
-### Método 2: Compilación Manual del APK (Línea de Comandos / Gradle)
+### Método 2: Compilación de la APK en Android mediante Termux (Sin PC)
+
+Este proyecto está configurado con **`compileSdk = 36`**, **`minSdk = 24`** y **Gradle KTS**, optimizado para poder ser compilado directamente en tu dispositivo móvil Android utilizando la aplicación **Termux**.
+
+#### 📱 Guía Paso a Paso para Compilar con Termux:
+
+##### 1. Preparar Termux en Android
+* Descarga e instala **Termux** desde F-Droid (recomendado) o GitHub para asegurarte de tener la versión más reciente.
+* Abre Termux y actualiza los paquetes básicos ejecutando:
+  ```bash
+  pkg update && pkg upgrade -y
+  ```
+
+##### 2. Instalar el entorno Java, Git y herramientas de desarrollo
+Instala OpenJDK (Java 17 o 21), Git y Gradle en el entorno de Termux:
+```bash
+pkg install openjdk-21 git gradle android-tools -y
+```
+
+##### 3. Otorgar permisos de almacenamiento
+Permite que Termux pueda acceder a las carpetas de tu teléfono para copiar el archivo APK una vez compilado:
+```bash
+termux-setup-storage
+```
+
+##### 4. Clonar el Repositorio e Ingresar al Proyecto
+```bash
+git clone https://github.com/tu-usuario/cordero-f-app.git
+cd cordero-f-app
+```
+
+##### 5. Configurar la variable ANDROID_HOME (si es necesario)
+Si utilizas el SDK de Android en Termux (mediante `commandlinetools-linux` o el paquete `android-sdk`):
+```bash
+export ANDROID_HOME=$HOME/android-sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+```
+
+##### 6. Compilar el archivo APK
+Ejecuta la tarea de compilación con Gradle:
+```bash
+gradle assembleDebug
+```
+*Si tienes el script ejecutable `gradlew`, también puedes usar:*
+```bash
+chmod +x gradlew
+./gradlew assembleDebug
+```
+
+##### 7. Copiar e Instalar la APK en tu Dispositivo
+Una vez finalizada la compilación con éxito, copia la APK directamente a la carpeta de **Descargas (Download)** de tu teléfono:
+```bash
+cp app/build/outputs/apk/debug/app-debug.apk /sdcard/Download/CorderoF.apk
+```
+Abre el gestor de archivos de tu teléfono, entra en la carpeta **Descargas**, pulsa sobre `CorderoF.apk` e instálala directamente en tu dispositivo.
+
+---
+
+### Método 3: Compilación Manual en PC (Línea de Comandos / Gradle)
 
 Si has clonado o descargado este repositorio en tu ordenador local:
 
 #### Requisitos Previos
-- **JDK 17** o superior instalado y configurado en tu `JAVA_HOME`.
-- **Android SDK** (API Level 36 instalado).
+- **JDK 17** o **21** instalado y configurado en tu `JAVA_HOME`.
+- **Android SDK** (API Level 36).
 
 #### Pasos para Compilar el APK:
 
 ```bash
-# 1. Clonar el repositorio (si utilizas Git)
+# 1. Clonar el repositorio
 git clone https://github.com/tu-usuario/cordero-f-app.git
 cd cordero-f-app
 
-# 2. Dar permisos de ejecución al ejecutable de Gradle (Linux/macOS)
+# 2. Dar permisos de ejecución a gradlew
 chmod +x gradlew
 
-# 3. Compilar el APK de depuración (Debug APK)
+# 3. Compilar el APK de depuración
 ./gradlew assembleDebug
 ```
 
 El ejecutable APK generado se ubicará en:
 `app/build/outputs/apk/debug/app-debug.apk`
 
-Puedes transferir e instalar este archivo `.apk` directamente en tu dispositivo Android activando la opción **"Instalar aplicaciones de fuentes desconocidas"**.
-
 ---
 
-### Método 3: Abrir y Ejecutar en Android Studio
+### Método 4: Abrir y Ejecutar en Android Studio
 
 1. Abre **Android Studio** (versión Ladybug / Iguana o superior).
 2. Selecciona **Open** y navega hasta la carpeta raíz del proyecto `cordero-f-app`.

@@ -1,5 +1,10 @@
 package com.example.ui
 
+import android.os.Build
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -68,7 +73,9 @@ import com.example.data.TaskPriority
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.StickyNote2
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.filled.WorkHistory
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -76,13 +83,16 @@ import com.example.ui.components.AddEditTaskSheet
 import com.example.ui.components.CategoryChipGroup
 import com.example.ui.components.EisenhowerMatrixView
 import com.example.ui.components.HabitsTrackerView
+import com.example.ui.components.OperationsDashboardView
 import com.example.ui.components.PinLockScreen
+import com.example.ui.components.QuickNotesView
 import com.example.ui.components.QuickStatsBar
 import com.example.ui.components.SecuritySettingsDialog
 import com.example.ui.components.SmartAssistantSheet
 import com.example.ui.components.TacticalCalendarView
 import com.example.ui.components.TaskItemCard
 import com.example.ui.components.UpcomingAppointmentsPanel
+import com.example.ui.components.WorkScheduleView
 import com.example.ui.theme.EmeraldPrimary
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -116,6 +126,27 @@ fun CorderoFApp(
 
     val addEditSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val smartAssistantSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Request POST_NOTIFICATIONS permission on Android 13+ (API 33)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (!isGranted) {
+                Toast.makeText(context, "Permite notificaciones para recibir alertas de tus citas", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 
     // Handle feedback toasts/snackbars
     LaunchedEffect(Unit) {
@@ -248,8 +279,8 @@ fun CorderoFApp(
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.Whatshot, contentDescription = "Hábitos y Rutinas") },
-                    label = { Text("Hábitos", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Default.WorkHistory, contentDescription = "Horario de Trabajo") },
+                    label = { Text("Horario", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldPrimary,
                         selectedTextColor = EmeraldPrimary,
@@ -260,6 +291,30 @@ fun CorderoFApp(
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
+                    icon = { Icon(Icons.Default.StickyNote2, contentDescription = "Notas Rápidas") },
+                    label = { Text("Notas", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == 4,
+                    onClick = { selectedTab = 4 },
+                    icon = { Icon(Icons.Default.Whatshot, contentDescription = "Hábitos y Rutinas") },
+                    label = { Text("Hábitos", fontSize = 11.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = EmeraldPrimary,
+                        selectedTextColor = EmeraldPrimary,
+                        indicatorColor = EmeraldPrimary.copy(alpha = 0.2f)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == 5,
+                    onClick = { selectedTab = 5 },
                     icon = { Icon(Icons.Default.GridView, contentDescription = "Matriz Eisenhower") },
                     label = { Text("Matriz", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -301,7 +356,46 @@ fun CorderoFApp(
                     }
                 }
                 2 -> {
-                    // TAB 2: Hábitos & Rutinas Diarias
+                    // TAB 2: Horario de Trabajo y Fichaje
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            WorkScheduleView()
+                        }
+                    }
+                }
+                3 -> {
+                    // TAB 3: Notas Rápidas & Widget
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            QuickNotesView(
+                                onConvertToTask = { noteTitle, noteDesc ->
+                                    viewModel.saveTask(
+                                        id = 0,
+                                        title = noteTitle,
+                                        description = noteDesc,
+                                        category = TaskCategory.PERSONAL,
+                                        priority = TaskPriority.MEDIA,
+                                        dueDateEpochMs = System.currentTimeMillis(),
+                                        dueTimeFormatted = "10:00",
+                                        reminderEpochMs = System.currentTimeMillis(),
+                                        isPinned = false,
+                                        subtasks = emptyList()
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+                4 -> {
+                    // TAB 4: Hábitos & Rutinas Diarias
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
@@ -312,8 +406,8 @@ fun CorderoFApp(
                         }
                     }
                 }
-                3 -> {
-                    // TAB 3: Matriz de Priorización Local
+                5 -> {
+                    // TAB 5: Matriz de Priorización Local
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
@@ -344,204 +438,28 @@ fun CorderoFApp(
                     }
                 }
                 else -> {
-                    // TAB 0: Vista Principal
-                    Column(modifier = Modifier.fillMaxSize()) {
-            // Dashboard Summary Header
-            QuickStatsBar(
-                stats = stats,
-                isOfflineMode = viewModel.securityManager.isOfflineOnlyMode(),
-                onSecurityClick = { viewModel.isSecurityDialogOpen.value = true }
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Upcoming Appointments & Pending Tasks Panel
-            UpcomingAppointmentsPanel(
-                tasks = tasks,
-                securityManager = viewModel.securityManager,
-                onLockApp = { viewModel.lockApp() },
-                onOpenSecuritySettings = { viewModel.isSecurityDialogOpen.value = true },
-                onAddNewAppointment = { viewModel.openAddSheet() },
-                onTaskClick = { task -> viewModel.openEditSheet(task) }
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Search Bar & Sort Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { viewModel.searchQuery.value = it },
-                    placeholder = { Text("Buscar tareas o notas...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { viewModel.searchQuery.value = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Limpiar búsqueda")
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .testTag("search_input"),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Sort Dropdown Button
-                Box {
-                    IconButton(onClick = { showSortMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Sort,
-                            contentDescription = "Ordenar",
-                            tint = EmeraldPrimary
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showSortMenu,
-                        onDismissRequest = { showSortMenu = false }
-                    ) {
-                        SortOption.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option.displayName) },
-                                onClick = {
-                                    viewModel.sortOption.value = option
-                                    showSortMenu = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Filter Chips (Categories & Completed toggle)
-            CategoryChipGroup(
-                selectedCategory = selectedCategory,
-                onCategorySelected = { viewModel.selectedCategory.value = it }
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // Secondary filters row (Completadas toggle)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FilterChip(
-                    selected = showCompletedOnly,
-                    onClick = { viewModel.showCompletedOnly.value = !showCompletedOnly },
-                    label = { Text("Mostrar completadas") },
-                    leadingIcon = {
-                        if (showCompletedOnly) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = EmeraldPrimary)
-                        }
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = EmeraldPrimary.copy(alpha = 0.2f),
-                        selectedLabelColor = EmeraldPrimary
+                    // TAB 0: Centro de Operaciones y Misiones
+                    OperationsDashboardView(
+                        tasks = tasks,
+                        stats = stats,
+                        securityManager = viewModel.securityManager,
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { viewModel.searchQuery.value = it },
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { viewModel.selectedCategory.value = it },
+                        showCompletedOnly = showCompletedOnly,
+                        onToggleCompletedOnly = { viewModel.showCompletedOnly.value = it },
+                        sortOption = sortOption,
+                        onSortOptionSelected = { viewModel.sortOption.value = it },
+                        onLockApp = { viewModel.lockApp() },
+                        onOpenSecuritySettings = { viewModel.isSecurityDialogOpen.value = true },
+                        onAddNewTask = { viewModel.openAddSheet() },
+                        onTaskClick = { task -> viewModel.openEditSheet(task) },
+                        onToggleTaskComplete = { task -> viewModel.toggleTaskCompleted(task) },
+                        onToggleTaskPin = { task -> viewModel.toggleTaskPinned(task) },
+                        onOpenSmartAssistant = { viewModel.isSmartAssistantOpen.value = true },
+                        onSwitchTab = { tab -> selectedTab = tab }
                     )
-                )
-
-                Text(
-                    text = "${tasks.size} tarea(s)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Tasks List
-            if (tasks.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier.padding(24.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = EmeraldPrimary,
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(48.dp)
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = if (searchQuery.isNotBlank()) "No se encontraron tareas para '$searchQuery'" else "¡No hay tareas en esta categoría!",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Presiona '+ Nueva Tarea' o usa el asistente para añadir recordatorios inteligentes.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(
-                        items = tasks,
-                        key = { it.id }
-                    ) { task ->
-                        TaskItemCard(
-                            task = task,
-                            onToggleCompleted = { viewModel.toggleTaskCompleted(task) },
-                            onTogglePinned = { viewModel.toggleTaskPinned(task) },
-                            onEdit = { viewModel.openEditSheet(task) },
-                            onDelete = { viewModel.deleteTask(task) },
-                            onSubtaskToggle = { subtaskId, isCompleted ->
-                                val list = task.getSubtasksList().toMutableList()
-                                val idx = list.indexOfFirst { it.id == subtaskId }
-                                if (idx != -1) {
-                                    list[idx] = list[idx].copy(isCompleted = isCompleted)
-                                    val updated = task.copy(subtasksJson = TaskEntity.toJson(list))
-                                    viewModel.saveTask(
-                                        id = updated.id,
-                                        title = updated.title,
-                                        description = updated.description,
-                                        category = try { TaskCategory.valueOf(updated.category) } catch (e: Exception) { TaskCategory.PERSONAL },
-                                        priority = try { TaskPriority.valueOf(updated.priority) } catch (e: Exception) { TaskPriority.MEDIA },
-                                        dueDateEpochMs = updated.dueDateEpochMs,
-                                        dueTimeFormatted = updated.dueTimeFormatted,
-                                        reminderEpochMs = updated.reminderEpochMs,
-                                        isPinned = updated.isPinned,
-                                        subtasks = list
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-                    }
                 }
             }
         }

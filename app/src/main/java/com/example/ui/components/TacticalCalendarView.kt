@@ -83,7 +83,12 @@ fun TacticalCalendarView(
 
     // Days calculation for calendar grid
     val daysInMonth = remember(calendarMonth.timeInMillis) {
-        val cal = calendarMonth.clone() as Calendar
+        val cal = (calendarMonth.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 12)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
         cal.set(Calendar.DAY_OF_MONTH, 1)
         val firstDayOfWeek = (cal.get(Calendar.DAY_OF_WEEK) + 5) % 7 // Monday = 0
         val maxDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
@@ -207,73 +212,82 @@ fun TacticalCalendarView(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.width(36.dp)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Grid of Days
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(7),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(210.dp),
-                    userScrollEnabled = false,
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                // Flexible Grid of Days (chunks of 7) to prevent clipping or truncated days
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    items(daysInMonth) { dayInfo ->
-                        if (dayInfo == null) {
-                            Box(modifier = Modifier.aspectRatio(1f))
-                        } else {
-                            val isSelected = isSameDay(dayInfo.epochMs, selectedDateMs)
+                    daysInMonth.chunked(7).forEach { week ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            week.forEach { dayInfo ->
+                                if (dayInfo == null) {
+                                    Box(modifier = Modifier.weight(1f).aspectRatio(1f))
+                                } else {
+                                    val isSelected = isSameDay(dayInfo.epochMs, selectedDateMs)
 
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(1f)
-                                    .clip(CircleShape)
-                                    .background(
-                                        when {
-                                            isSelected -> EmeraldPrimary
-                                            dayInfo.isToday -> EmeraldPrimary.copy(alpha = 0.25f)
-                                            else -> MaterialTheme.colorScheme.surface
-                                        }
-                                    )
-                                    .border(
-                                        width = if (dayInfo.isToday && !isSelected) 2.dp else 0.dp,
-                                        color = EmeraldPrimary,
-                                        shape = CircleShape
-                                    )
-                                    .clickable {
-                                        selectedDateMs = dayInfo.epochMs
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = dayInfo.dayNumber.toString(),
-                                        fontSize = 13.sp,
-                                        fontWeight = if (isSelected || dayInfo.isToday) FontWeight.Bold else FontWeight.Normal,
-                                        color = when {
-                                            isSelected -> MaterialTheme.colorScheme.onPrimary
-                                            dayInfo.isToday -> EmeraldPrimary
-                                            else -> MaterialTheme.colorScheme.onSurface
-                                        }
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .aspectRatio(1f)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isSelected -> EmeraldPrimary
+                                                    dayInfo.isToday -> EmeraldPrimary.copy(alpha = 0.25f)
+                                                    else -> MaterialTheme.colorScheme.surface
+                                                }
+                                            )
+                                            .border(
+                                                width = if (dayInfo.isToday && !isSelected) 2.dp else 0.dp,
+                                                color = EmeraldPrimary,
+                                                shape = CircleShape
+                                            )
+                                            .clickable {
+                                                selectedDateMs = dayInfo.epochMs
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = dayInfo.dayNumber.toString(),
+                                                fontSize = 13.sp,
+                                                fontWeight = if (isSelected || dayInfo.isToday) FontWeight.Bold else FontWeight.Normal,
+                                                color = when {
+                                                    isSelected -> MaterialTheme.colorScheme.onPrimary
+                                                    dayInfo.isToday -> EmeraldPrimary
+                                                    else -> MaterialTheme.colorScheme.onSurface
+                                                }
+                                            )
 
-                                    if (dayInfo.hasAppointments) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(5.dp)
-                                                .clip(CircleShape)
-                                                .background(if (isSelected) MaterialTheme.colorScheme.onPrimary else if (dayInfo.hasHighPriority) PriorityHighRed else EmeraldPrimary)
-                                        )
+                                            if (dayInfo.hasAppointments) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(5.dp)
+                                                        .clip(CircleShape)
+                                                        .background(if (isSelected) MaterialTheme.colorScheme.onPrimary else if (dayInfo.hasHighPriority) PriorityHighRed else EmeraldPrimary)
+                                                )
+                                            }
+                                        }
                                     }
+                                }
+                            }
+                            // Fill remaining empty slots in last week row if less than 7 days
+                            if (week.size < 7) {
+                                repeat(7 - week.size) {
+                                    Box(modifier = Modifier.weight(1f).aspectRatio(1f))
                                 }
                             }
                         }

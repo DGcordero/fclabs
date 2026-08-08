@@ -18,13 +18,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.LocalDrink
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.SelfImprovement
@@ -82,8 +82,8 @@ fun HabitsTrackerView(
     val habits = remember {
         mutableStateListOf(
             DailyHabit("h1", "Tomar 2 Litros de Agua", "Salud", "8 vasos", Icons.Default.LocalDrink, false, 5),
-            DailyHabit("h2", "Ejercicio Físico 30 min", "Bienestar", "30 mins", Icons.Default.DirectionsRun, false, 3),
-            DailyHabit("h3", "Lectura o Estudio Personal", "Crecimiento", "15 págs", Icons.Default.MenuBook, false, 12),
+            DailyHabit("h2", "Ejercicio Físico 30 min", "Bienestar", "30 mins", Icons.AutoMirrored.Filled.DirectionsRun, false, 3),
+            DailyHabit("h3", "Lectura o Estudio Personal", "Crecimiento", "15 págs", Icons.AutoMirrored.Filled.MenuBook, false, 12),
             DailyHabit("h4", "Tomar Medicación / Vitaminas", "Salud", "1 dosis", Icons.Default.Medication, true, 8),
             DailyHabit("h5", "Dormir 8 Horas", "Descanso", "8 horas", Icons.Default.Nightlight, false, 2)
         )

@@ -237,7 +237,7 @@ private fun AppointmentCard(
 
     val formattedDate = remember(item.dueDateEpochMs, item.dueTimeFormatted) {
         if (item.dueDateEpochMs != null) {
-            val sdf = SimpleDateFormat("dd MMM", Locale("es", "ES"))
+            val sdf = SimpleDateFormat("dd MMM", Locale.forLanguageTag("es-ES"))
             val dateStr = sdf.format(Date(item.dueDateEpochMs))
             if (!item.dueTimeFormatted.isNull_or_blank_safe()) {
                 "$dateStr, ${item.dueTimeFormatted}"

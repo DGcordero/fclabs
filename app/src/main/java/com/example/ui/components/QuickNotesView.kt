@@ -26,7 +26,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.StickyNote2
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -104,7 +104,7 @@ fun QuickNotesView(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.StickyNote2,
+                            imageVector = Icons.AutoMirrored.Filled.StickyNote2,
                             contentDescription = null,
                             tint = AccentAmber,
                             modifier = Modifier.size(24.dp)
@@ -200,7 +200,7 @@ fun QuickNotesView(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.StickyNote2, contentDescription = null, tint = AccentAmber, modifier = Modifier.size(18.dp))
+                                    Icon(imageVector = Icons.AutoMirrored.Filled.StickyNote2, contentDescription = null, tint = AccentAmber, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = "WIDGET NOTAS RÁPIDAS (PANTALLA DE INICIO)",

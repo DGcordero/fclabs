@@ -78,8 +78,8 @@ fun TacticalCalendarView(
     var calendarMonth by remember { mutableStateOf(Calendar.getInstance()) }
     var selectedDateMs by remember { mutableStateOf(System.currentTimeMillis()) }
 
-    val monthYearFormat = remember { SimpleDateFormat("MMMM yyyy", Locale("es", "ES")) }
-    val dayMonthFormat = remember { SimpleDateFormat("EEEE, d 'de' MMMM", Locale("es", "ES")) }
+    val monthYearFormat = remember { SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("es-ES")) }
+    val dayMonthFormat = remember { SimpleDateFormat("EEEE, d 'de' MMMM", Locale.forLanguageTag("es-ES")) }
 
     // Days calculation for calendar grid
     val daysInMonth = remember(calendarMonth.timeInMillis) {

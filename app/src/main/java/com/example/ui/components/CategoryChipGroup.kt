@@ -10,7 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RocketLaunch
@@ -67,7 +67,7 @@ fun CategoryChipGroup(
 
 fun getCategoryIcon(category: TaskCategory): ImageVector {
     return when (category) {
-        TaskCategory.TODAS -> Icons.Default.FormatListBulleted
+        TaskCategory.TODAS -> Icons.AutoMirrored.Filled.FormatListBulleted
         TaskCategory.CITAS -> Icons.Default.Event
         TaskCategory.PERSONAL -> Icons.Default.Person
         TaskCategory.TRABAJO -> Icons.Default.Work

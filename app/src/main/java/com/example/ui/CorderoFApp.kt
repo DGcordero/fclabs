@@ -73,7 +73,7 @@ import com.example.data.TaskPriority
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.StickyNote2
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.filled.WorkHistory
 import androidx.compose.material3.NavigationBar
@@ -291,7 +291,7 @@ fun CorderoFApp(
                 NavigationBarItem(
                     selected = selectedTab == 3,
                     onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Default.StickyNote2, contentDescription = "Notas Rápidas") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.StickyNote2, contentDescription = "Notas Rápidas") },
                     label = { Text("Notas", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = EmeraldPrimary,

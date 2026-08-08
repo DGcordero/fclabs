@@ -218,7 +218,7 @@ fun TaskItemCard(
 
                 // Due Date Chip
                 if (task.dueDateEpochMs != null) {
-                    val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale("es", "ES"))
+                    val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.forLanguageTag("es-ES"))
                     val dateStr = sdf.format(Date(task.dueDateEpochMs))
 
                     Surface(

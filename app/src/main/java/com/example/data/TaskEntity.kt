@@ -75,7 +75,7 @@ data class TaskEntity(
 
     fun getFormattedDueDate(): String {
         return if (dueDateEpochMs != null) {
-            val sdf = java.text.SimpleDateFormat("dd MMM", java.util.Locale("es", "ES"))
+            val sdf = java.text.SimpleDateFormat("dd MMM", java.util.Locale.forLanguageTag("es-ES"))
             val dateStr = sdf.format(java.util.Date(dueDateEpochMs))
             if (!dueTimeFormatted.isNullOrBlank()) {
                 "$dateStr, $dueTimeFormatted"

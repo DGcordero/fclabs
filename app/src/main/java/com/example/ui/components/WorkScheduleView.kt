@@ -41,8 +41,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Refresh
@@ -384,7 +384,7 @@ fun WorkScheduleView(
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(
-                            imageVector = if (isClockedIn) Icons.Default.Logout else Icons.Default.Login,
+                            imageVector = if (isClockedIn) Icons.AutoMirrored.Filled.Logout else Icons.AutoMirrored.Filled.Login,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )

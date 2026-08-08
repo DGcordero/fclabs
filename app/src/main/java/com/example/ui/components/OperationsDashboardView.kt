@@ -25,6 +25,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -39,8 +43,6 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Pin
@@ -48,8 +50,6 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.StickyNote2
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Whatshot
@@ -138,9 +138,9 @@ fun OperationsDashboardView(
 
     // Date formatting for operations briefing
     val todayFormatted = remember {
-        val sdf = SimpleDateFormat("EEEE, dd 'de' MMMM", Locale("es", "ES"))
+        val sdf = SimpleDateFormat("EEEE, dd 'de' MMMM", Locale.forLanguageTag("es-ES"))
         val str = sdf.format(Date())
-        str.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es", "ES")) else it.toString() }
+        str.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.forLanguageTag("es-ES")) else it.toString() }
     }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
 
@@ -330,7 +330,7 @@ fun OperationsDashboardView(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         LinearProgressIndicator(
-                            progress = completionPercent,
+                            progress = { completionPercent },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(8.dp)
@@ -509,7 +509,7 @@ fun OperationsDashboardView(
                             shape = RoundedCornerShape(10.dp)
                         ) {
                             Icon(
-                                imageVector = if (isClockedIn) Icons.Default.Logout else Icons.Default.Login,
+                                imageVector = if (isClockedIn) Icons.AutoMirrored.Filled.Logout else Icons.AutoMirrored.Filled.Login,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -556,7 +556,7 @@ fun OperationsDashboardView(
                     // Sort menu
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Default.Sort, contentDescription = "Ordenar", tint = EmeraldPrimary)
+                            Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Ordenar", tint = EmeraldPrimary)
                         }
 
                         DropdownMenu(
@@ -696,7 +696,7 @@ fun OperationsDashboardView(
                             modifier = Modifier.weight(1f)
                         )
                         ModulePill(
-                            icon = Icons.Default.StickyNote2,
+                            icon = Icons.AutoMirrored.Filled.StickyNote2,
                             title = "Notas",
                             subtitle = "Rápidas",
                             onClick = { onSwitchTab(3) },

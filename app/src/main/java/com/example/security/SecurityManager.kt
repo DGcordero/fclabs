@@ -2,6 +2,7 @@ package com.example.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.security.MessageDigest
 
 class SecurityManager(context: Context) {
 
@@ -20,16 +21,36 @@ class SecurityManager(context: Context) {
         return prefs.getString(KEY_PIN_CODE, "") ?: ""
     }
 
+    private fun hashPin(pin: String): String {
+        if (pin.isEmpty()) return ""
+        val bytes = MessageDigest.getInstance("SHA-256").digest(("corderof_salt_" + pin).toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
     fun setPinCode(pin: String) {
-        prefs.edit().putString(KEY_PIN_CODE, pin).apply()
-        if (pin.isNotEmpty()) {
-            setPinLockEnabled(true)
+        if (pin.isEmpty()) {
+            prefs.edit().remove(KEY_PIN_CODE).putBoolean(KEY_PIN_ENABLED, false).apply()
+        } else {
+            val hashed = hashPin(pin)
+            prefs.edit().putString(KEY_PIN_CODE, hashed).putBoolean(KEY_PIN_ENABLED, true).apply()
         }
     }
 
     fun verifyPin(inputPin: String): Boolean {
         val stored = getStoredPin()
-        return stored.isEmpty() || stored == inputPin
+        if (stored.isEmpty()) return true
+        
+        // Check if stored pin is hashed (SHA-256 hex length is 64)
+        return if (stored.length == 64) {
+            stored == hashPin(inputPin)
+        } else {
+            // Legacy raw pin match -> auto-upgrade to hashed pin
+            val isMatch = stored == inputPin
+            if (isMatch) {
+                setPinCode(inputPin)
+            }
+            isMatch
+        }
     }
 
     fun isOfflineOnlyMode(): Boolean {
@@ -46,3 +67,4 @@ class SecurityManager(context: Context) {
         private const val KEY_OFFLINE_MODE = "offline_mode"
     }
 }
+

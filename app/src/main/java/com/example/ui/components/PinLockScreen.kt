@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backspace
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Card
@@ -149,7 +149,7 @@ fun PinLockScreen(
                                     .height(64.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                if (key == "back") {
+                                 if (key == "back") {
                                     IconButton(
                                         onClick = {
                                             if (pinInput.isNotEmpty()) {
@@ -159,7 +159,7 @@ fun PinLockScreen(
                                         }
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Backspace,
+                                            imageVector = Icons.AutoMirrored.Filled.Backspace,
                                             contentDescription = "Borrar",
                                             tint = MaterialTheme.colorScheme.onSurface
                                         )

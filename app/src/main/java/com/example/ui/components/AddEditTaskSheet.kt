@@ -343,7 +343,7 @@ fun AddEditTaskSheet(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (dueDateEpochMs != null) {
-                            SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES")).format(Date(dueDateEpochMs!!))
+                            SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("es-ES")).format(Date(dueDateEpochMs!!))
                         } else "Elegir Fecha"
                     )
                 }

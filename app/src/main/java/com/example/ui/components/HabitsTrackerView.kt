@@ -2,7 +2,8 @@ package com.example.ui.components
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Whatshot
@@ -43,7 +45,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,44 +55,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.HabitEntity
 import com.example.ui.theme.AccentAmber
 import com.example.ui.theme.EmeraldPrimary
 import com.example.ui.theme.PriorityHighRed
 import com.example.ui.theme.TealSecondary
 
-data class DailyHabit(
-    val id: String,
-    val title: String,
-    val category: String,
-    val target: String,
-    val icon: ImageVector,
-    var isCompletedToday: Boolean = false,
-    var streakDays: Int = 0
-)
+fun getHabitIcon(category: String): ImageVector {
+    return when (category.lowercase()) {
+        "salud" -> Icons.Default.LocalDrink
+        "bienestar", "ejercicio", "deporte" -> Icons.AutoMirrored.Filled.DirectionsRun
+        "crecimiento", "lectura", "estudio" -> Icons.AutoMirrored.Filled.MenuBook
+        "descanso", "sueño" -> Icons.Default.Nightlight
+        else -> Icons.Default.Star
+    }
+}
 
 @Composable
 fun HabitsTrackerView(
+    habits: List<HabitEntity>,
+    onAddHabit: (title: String, category: String, target: String) -> Unit,
+    onToggleHabit: (HabitEntity) -> Unit,
+    onDeleteHabit: (HabitEntity) -> Unit,
+    onTriggerNotification: (HabitEntity) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
-    val habits = remember {
-        mutableStateListOf(
-            DailyHabit("h1", "Tomar 2 Litros de Agua", "Salud", "8 vasos", Icons.Default.LocalDrink, false, 5),
-            DailyHabit("h2", "Ejercicio Físico 30 min", "Bienestar", "30 mins", Icons.AutoMirrored.Filled.DirectionsRun, false, 3),
-            DailyHabit("h3", "Lectura o Estudio Personal", "Crecimiento", "15 págs", Icons.AutoMirrored.Filled.MenuBook, false, 12),
-            DailyHabit("h4", "Tomar Medicación / Vitaminas", "Salud", "1 dosis", Icons.Default.Medication, true, 8),
-            DailyHabit("h5", "Dormir 8 Horas", "Descanso", "8 horas", Icons.Default.Nightlight, false, 2)
-        )
-    }
-
     var showAddDialog by remember { mutableStateOf(false) }
     var newHabitTitle by remember { mutableStateOf("") }
     var newHabitTarget by remember { mutableStateOf("1 vez al día") }
+    var newHabitCategory by remember { mutableStateOf("Salud") }
 
     val completedCount = habits.count { it.isCompletedToday }
     val progressRatio = if (habits.isNotEmpty()) completedCount.toFloat() / habits.size else 0f
@@ -104,7 +103,9 @@ fun HabitsTrackerView(
     ) {
         // Daily Progress Banner
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, EmeraldPrimary.copy(alpha = 0.4f), RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
@@ -121,17 +122,19 @@ fun HabitsTrackerView(
                                 contentDescription = null,
                                 tint = AccentAmber,
                                 modifier = Modifier.size(22.dp)
-                            )
+                              )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Hábitos & Rutinas Diarias",
+                                text = "LOG DE HABITOS DE COMBATE",
+                                fontFamily = FontFamily.Monospace,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = EmeraldPrimary
                             )
                         }
                         Text(
-                            text = "Completados hoy: $completedCount de ${habits.size}",
+                            text = "COMPLETADOS HOY: $completedCount de ${habits.size}",
+                            fontFamily = FontFamily.Monospace,
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -144,7 +147,7 @@ fun HabitsTrackerView(
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Nuevo Hábito", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text("AÑADIR", fontFamily = FontFamily.Monospace, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -165,22 +168,25 @@ fun HabitsTrackerView(
         // Add Habit Expanded Input
         AnimatedVisibility(visible = showAddDialog) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, EmeraldPrimary.copy(alpha = 0.5f), RoundedCornerShape(16.dp)),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = EmeraldPrimary.copy(alpha = 0.15f))
+                colors = CardDefaults.cardColors(containerColor = EmeraldPrimary.copy(alpha = 0.08f))
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(
-                        text = "Añadir Hábito Personal",
+                        text = "REGISTRAR RUTINA DIARIA",
+                        fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = EmeraldPrimary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = newHabitTitle,
                         onValueChange = { newHabitTitle = it },
-                        placeholder = { Text("Ej: Meditar 10 minutos", fontSize = 12.sp) },
+                        placeholder = { Text("Ej: Meditar 10 minutos", fontSize = 12.sp, fontFamily = FontFamily.Monospace) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(10.dp)
@@ -190,25 +196,14 @@ fun HabitsTrackerView(
                         Button(
                             onClick = {
                                 if (newHabitTitle.isNotBlank()) {
-                                    habits.add(
-                                        DailyHabit(
-                                            id = System.currentTimeMillis().toString(),
-                                            title = newHabitTitle.trim(),
-                                            category = "Personal",
-                                            target = newHabitTarget,
-                                            icon = Icons.Default.Star,
-                                            isCompletedToday = false,
-                                            streakDays = 1
-                                        )
-                                    )
+                                    onAddHabit(newHabitTitle.trim(), newHabitCategory, newHabitTarget)
                                     newHabitTitle = ""
                                     showAddDialog = false
-                                    Toast.makeText(context, "Hábito añadido a tu rutina", Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = EmeraldPrimary)
                         ) {
-                            Text("Guardar Hábito", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("GUARDAR RUTINA", fontFamily = FontFamily.Monospace, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -217,11 +212,13 @@ fun HabitsTrackerView(
 
         // List of Habits
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            habits.forEachIndexed { index, habit ->
+            habits.forEach { habit ->
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = if (habit.isCompletedToday) EmeraldPrimary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, if (habit.isCompletedToday) EmeraldPrimary.copy(alpha = 0.5f) else Color.Transparent, RoundedCornerShape(16.dp))
                 ) {
                     Row(
                         modifier = Modifier
@@ -235,13 +232,7 @@ fun HabitsTrackerView(
                             modifier = Modifier.weight(1f)
                         ) {
                             IconButton(
-                                onClick = {
-                                    val current = habit.isCompletedToday
-                                    habits[index] = habit.copy(
-                                        isCompletedToday = !current,
-                                        streakDays = if (!current) habit.streakDays + 1 else (habit.streakDays - 1).coerceAtLeast(0)
-                                    )
-                                }
+                                onClick = { onToggleHabit(habit) }
                             ) {
                                 Icon(
                                     imageVector = if (habit.isCompletedToday) Icons.Default.CheckCircle else Icons.Default.Check,
@@ -255,7 +246,8 @@ fun HabitsTrackerView(
 
                             Column {
                                 Text(
-                                    text = habit.title,
+                                    text = habit.title.uppercase(),
+                                    fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -264,7 +256,8 @@ fun HabitsTrackerView(
                                 )
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "${habit.category} • Meta: ${habit.target}",
+                                        text = "[${habit.category.uppercase()} • META: ${habit.target.uppercase()}]",
+                                        fontFamily = FontFamily.Monospace,
                                         fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -275,7 +268,8 @@ fun HabitsTrackerView(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = AccentAmber.copy(alpha = 0.2f)
+                                color = AccentAmber.copy(alpha = 0.2f),
+                                modifier = Modifier.clickable { onTriggerNotification(habit) }
                             ) {
                                 Row(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -283,13 +277,14 @@ fun HabitsTrackerView(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Whatshot,
-                                        contentDescription = null,
+                                        contentDescription = "Racha. Pulsa para probar notificación.",
                                         tint = AccentAmber,
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Spacer(modifier = Modifier.width(2.dp))
                                     Text(
-                                        text = "${habit.streakDays}d",
+                                        text = "RACHA: ${habit.streakDays}d",
+                                        fontFamily = FontFamily.Monospace,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = AccentAmber
@@ -298,9 +293,7 @@ fun HabitsTrackerView(
                             }
 
                             IconButton(
-                                onClick = {
-                                    habits.removeAt(index)
-                                }
+                                onClick = { onDeleteHabit(habit) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,

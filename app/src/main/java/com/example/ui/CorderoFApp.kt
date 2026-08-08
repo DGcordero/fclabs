@@ -43,7 +43,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -110,6 +109,7 @@ fun CorderoFApp(
     val isPinLocked by viewModel.isPinLocked.collectAsState()
     val tasks by viewModel.filteredTasks.collectAsState()
     val stats by viewModel.taskStats.collectAsState()
+    val habits by viewModel.habits.collectAsState()
 
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
@@ -133,7 +133,7 @@ fun CorderoFApp(
             contract = ActivityResultContracts.RequestPermission()
         ) { isGranted ->
             if (!isGranted) {
-                Toast.makeText(context, "Permite notificaciones para recibir alertas de tus citas", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Permite notificaciones para recibir alertas de tus misiones", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -402,7 +402,26 @@ fun CorderoFApp(
                     ) {
                         item {
                             Spacer(modifier = Modifier.height(12.dp))
-                            HabitsTrackerView()
+                            HabitsTrackerView(
+                                habits = habits,
+                                onAddHabit = { title, category, target ->
+                                    viewModel.addHabit(title, category, target)
+                                },
+                                onToggleHabit = { habit ->
+                                    viewModel.toggleHabitCompleted(habit)
+                                },
+                                onDeleteHabit = { habit ->
+                                    viewModel.deleteHabit(habit)
+                                },
+                                onTriggerNotification = { habit ->
+                                    val testIntent = android.content.Intent(context, com.example.reminder.TaskReminderReceiver::class.java).apply {
+                                        putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_ID, habit.id + 20000)
+                                        putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_TITLE, "⚡ ¡Racha Militar de Hábitos!")
+                                        putExtra(com.example.reminder.TaskReminderReceiver.EXTRA_TASK_DESC, "⚠️ ¡Atención Soldado! No pierdas tu racha de '${habit.title}' (Racha actual: ${habit.streakDays} días). ¡A la carga! 🫡")
+                                    }
+                                    context.sendBroadcast(testIntent)
+                                }
+                            )
                         }
                     }
                 }

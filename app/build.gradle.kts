@@ -46,7 +46,9 @@ android {
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug {
+      // Use built-in default debug signing config to handle missing local keystore file
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11

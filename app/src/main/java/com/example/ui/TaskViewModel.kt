@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.AppDatabase
+import com.example.data.HabitEntity
 import com.example.data.Subtask
 import com.example.data.TaskCategory
 import com.example.data.TaskEntity
@@ -37,7 +38,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val db = AppDatabase.getInstance(application)
-        repository = TaskRepository(db.taskDao(), application)
+        repository = TaskRepository(db.taskDao(), db.habitDao(), application)
     }
 
     // Filter states
@@ -78,6 +79,57 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         sortOption
     ) { query, category, priority, completedOnly, sort ->
         FilterParams(query, category, priority, completedOnly, sort)
+    }
+
+    // Habits State Flow
+    val habits: StateFlow<List<HabitEntity>> = repository.allHabits
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    fun addHabit(title: String, category: String = "Salud", target: String = "1 vez al día") {
+        if (title.isBlank()) return
+        viewModelScope.launch {
+            val newHabit = HabitEntity(
+                title = title.trim(),
+                category = category,
+                target = target,
+                isCompletedToday = false,
+                streakDays = 0,
+                lastCompletedEpochMs = null
+            )
+            repository.insertHabit(newHabit)
+            _userFeedback.emit("Hábito añadido a tu rutina")
+        }
+    }
+
+    fun toggleHabitCompleted(habit: HabitEntity) {
+        viewModelScope.launch {
+            val isCurrentlyCompleted = habit.isCompletedToday
+            val newCompleted = !isCurrentlyCompleted
+            val newStreak = if (newCompleted) {
+                habit.streakDays + 1
+            } else {
+                (habit.streakDays - 1).coerceAtLeast(0)
+            }
+            val updated = habit.copy(
+                isCompletedToday = newCompleted,
+                streakDays = newStreak,
+                lastCompletedEpochMs = if (newCompleted) System.currentTimeMillis() else habit.lastCompletedEpochMs
+            )
+            repository.updateHabit(updated)
+            val msg = if (newCompleted) "¡Hábito '${habit.title}' completado hoy! 🔥" else "Hábito marcado como pendiente"
+            _userFeedback.emit(msg)
+        }
+    }
+
+    fun deleteHabit(habit: HabitEntity) {
+        viewModelScope.launch {
+            repository.deleteHabit(habit)
+            _userFeedback.emit("Hábito eliminado")
+        }
     }
 
     // Combined filtered task flow

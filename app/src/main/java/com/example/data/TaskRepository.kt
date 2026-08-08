@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 class TaskRepository(
     private val taskDao: TaskDao,
+    private val habitDao: HabitDao,
     private val context: Context
 ) {
     private val reminderScheduler = ReminderScheduler(context)
@@ -18,6 +19,7 @@ class TaskRepository(
 
     val allTasks: Flow<List<TaskEntity>> = taskDao.getAllTasks()
     val pendingTasks: Flow<List<TaskEntity>> = taskDao.getPendingTasks()
+    val allHabits: Flow<List<HabitEntity>> = habitDao.getAllHabits()
 
     fun getTaskById(id: Int): Flow<TaskEntity?> = taskDao.getTaskById(id)
 
@@ -56,6 +58,19 @@ class TaskRepository(
 
     suspend fun deleteCompletedTasks() {
         taskDao.deleteCompletedTasks()
+    }
+
+    // Habits CRUD
+    suspend fun insertHabit(habit: HabitEntity): Long {
+        return habitDao.insertHabit(habit)
+    }
+
+    suspend fun updateHabit(habit: HabitEntity) {
+        habitDao.updateHabit(habit)
+    }
+
+    suspend fun deleteHabit(habit: HabitEntity) {
+        habitDao.deleteHabit(habit)
     }
 
     // Export & Import for offline privacy guarantee

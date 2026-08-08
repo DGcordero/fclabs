@@ -1,6 +1,7 @@
 package com.example.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -32,7 +33,13 @@ data class Subtask(
     val isCompleted: Boolean = false
 )
 
-@Entity(tableName = "tasks")
+@Entity(
+    tableName = "tasks",
+    indices = [
+        Index(value = ["dueDateEpochMs"]),
+        Index(value = ["category"])
+    ]
+)
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
